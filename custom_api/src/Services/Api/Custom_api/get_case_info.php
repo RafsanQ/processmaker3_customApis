@@ -59,13 +59,13 @@ class get_case_info extends Api
     private function throwExceptionCaseDoesNotExist($applicationUid, $fieldNameForException)
     {
         throw new \Exception(\G::LoadTranslation(
-            'ID_CASE_DOES_NOT_EXIST2', [$fieldNameForException, $applicationUid]
+            'ID_CASE_DOES_NOT_EXIST', [$fieldNameForException, $applicationUid]
         ));
     }
 
 
 
-  public function throwExceptionIfNotExistsCase($applicationUid, $delIndex, $fieldNameForException)
+    public function throwExceptionIfNotExistsCase($applicationUid, $delIndex, $fieldNameForException)
     {
         try {
             $obj = \ApplicationPeer::retrieveByPK($applicationUid);
@@ -78,15 +78,17 @@ class get_case_info extends Api
                 $flag = is_null($obj);
             }
 
+            // If this AppUid does not exist
             if ($flag) {
-                $this->throwExceptionCaseDoesNotExist($applicationUid, $fieldNameForException);
+                // $this->throwExceptionCaseDoesNotExist($applicationUid, $fieldNameForException);
+                return "ID_CASE_DOES_NOT_EXIST";
             }
         } catch (\Exception $e) {
             throw $e;
         }
     }
 
-  public function getCaseInfo($applicationUid, $userUid)
+    public function getCaseInfo($applicationUid, $userUid)
     {
 
         try {
@@ -253,7 +255,9 @@ class get_case_info extends Api
                 \G::LoadClass("wsBase");
 
                 //Verify data
-                $this->throwExceptionIfNotExistsCase($applicationUid, 0, $this->getFieldNameByFormatFieldName("APP_UID"));
+                if($this->throwExceptionIfNotExistsCase($applicationUid, 0, $this->getFieldNameByFormatFieldName("APP_UID")) == "ID_CASE_DOES_NOT_EXIST"){
+                    return "ID_CASE_DOES_NOT_EXIST";
+                }
 
                 $criteria = new \Criteria("workflow");
 
@@ -357,30 +361,30 @@ class get_case_info extends Api
     }
 
 
-  /**
-   * @url GET /get-case-info/app-uid/:appUid
-   */
+    /**
+     * @url GET /get-case-info/app-uid/:appUid
+     */
 
-  public function app_uid($appUid)
-  {
-    return $this->doGetCaseInfo($appUid);
-  }
-
-
-  /**
-   * @url POST /get-case-info/list-app-info/
-   */
-
-  public function post_list_app_info (array $app_uids)
-  {
-    $outputList = array();
-
-    foreach($app_uids as $app_uid){
-      $outputList[] = $this->doGetCaseInfo($app_uid);
+    public function app_uid($appUid)
+    {
+        return $this->doGetCaseInfo($appUid);
     }
 
-    return $outputList;
-  }
+
+    /**
+     * @url POST /get-case-info/list-app-info/
+     */
+
+    public function post_list_app_info (array $app_uids)
+    {
+        $outputList = array();
+
+        foreach($app_uids as $app_uid){
+        $outputList[] = $this->doGetCaseInfo($app_uid);
+        }
+
+        return $outputList;
+    }
 
 
 
